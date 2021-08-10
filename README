@@ -1,0 +1,6 @@
+This pogram must be started as a super user
+
+The superuser must have the following packages installed
+
+pip install scapy
+pip install netifaces

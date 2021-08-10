@@ -30,16 +30,28 @@ ssidCount =0
 count = 0
 channelNumber = 0
 
+iface_mon = ""
+
 def startMonitorMode(cmd):
+	os.system("airmon-ng check kill")
 	print(cmd)
 	os.system(cmd)
 
 	while(True):
-		interface_list = netifaces.interfaces()
-		if "wlan0mon" in interface_list:
+		valid_mon = get_interface_in_monitor_mode()
+		if valid_mon:
 			break
 
 		sleep(1)
+
+
+def get_interface_in_monitor_mode():
+	global iface_mon
+	interface_list = netifaces.interfaces()
+	for i in range(len(interface_list)):
+		if ("mon" == interface_list[i][-3:]):
+			iface_mon = interface_list[i]
+			return True
 
 
 def getInterface():
@@ -151,7 +163,7 @@ def client_sniffer(conn):
 		global count
 		count = count+1
 		i = randint(1,13)
-		os.system("iwconfig wlan0mon channel "+str(i))
+		os.system("iwconfig " + iface_mon + " channel "+str(i))
 		if pkt.haslayer(Dot11ProbeReq):
 			if len(pkt.info) > 0 :
 				testcase = str(pkt.addr2) + '---' + str(pkt.info)
@@ -172,7 +184,7 @@ def ssid_sniffer(conn):
 		global ssidCount
 		ssidCount = ssidCount +1
 		i = randint(1,13)
-		os.system("iwconfig wlan0mon channel "+str(i))
+		os.system("iwconfig " + iface_mon + " channel "+str(i))
 
 		if pkt.haslayer(Dot11Beacon):
 			if (pkt.info not in ssidsSet) and pkt.info:
